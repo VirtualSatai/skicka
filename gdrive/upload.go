@@ -331,18 +331,20 @@ func (gd *GDrive) UploadFileContentsResumable(file *File,
 	}
 
 	// TODO: what is a reasonable default here? Must be 256kB minimum.
-	chunkSize := 1024 * 1024
+	chunkSize := 1024 * 1024 * 16
+
+	gd.debug("Uploading size %d", chunkSize)
 
 	seekableReader := makeSomewhatSeekableReader(contentsReader, 2*chunkSize)
 
 	// Upload the file in chunks of size chunkSize (or smaller, for the
 	// very last chunk).
 	for currentOffset, try := int64(0), 0; currentOffset < contentLength; try++ {
-		end := currentOffset + int64(chunkSize)
+		end := currentOffset + int64(chunkSize) * 2
 		if end > contentLength {
 			end = contentLength
 		}
-		gd.debug("%s: uploading chunk %d - %d...", file.Path,
+		gd.debug("%s: aauploading chunk %d - %d...", file.Path,
 			currentOffset, end)
 
 		// We should usually already be at the current offset; this
